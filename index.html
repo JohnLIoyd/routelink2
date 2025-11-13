@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RouteLink - Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-card">
+            <h1>RouteLink</h1>
+            <h2>Trucking Booking System</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p class="error-message" id="errorMessage"></p>
+                <p class="switch-form">
+                    Don't have an account? <a href="register.html">Register here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Login Script -->
+    <script type="module">
+        import { auth, db } from "./firebase-config.js";
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const loginForm = document.getElementById("loginForm");
+        const errorMessage = document.getElementById("errorMessage");
+
+        const roleRedirectMap = {
+            admin: "admin.html",
+            driver: "driver.html",
+            user: "user.html"
+        };
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            errorMessage.textContent = "";
+            errorMessage.style.display = "none";
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!email || !password) {
+                showError("Please enter both email and password.");
+                return;
+            }
+
+            try {
+                const credential = await signInWithEmailAndPassword(auth, email, password);
+                const user = credential.user;
+
+                const userDocRef = doc(db, "users", user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (!userDocSnap.exists()) {
+                    showError("User record not found.");
+                    return;
+                }
+
+                const userData = userDocSnap.data();
+                const role = userData.role || "user";
+
+                cacheUserSession({
+                    id: user.uid,
+                    uid: user.uid,
+                    email: user.email || "",
+                    name: userData.name || user.displayName || "",
+                    role,
+                    license: userData.license || "",
+                    password
+                });
+
+                window.location.href = roleRedirectMap[role] || "user.html";
+            } catch (error) {
+                showError(normalizeAuthError(error));
+            }
+        });
+
+        function cacheUserSession(user) {
+            try {
+                localStorage.setItem("currentUser", JSON.stringify(user));
+
+                const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+                const existingIndex = storedUsers.findIndex((item) => item.id === user.id || item.email === user.email);
+
+                if (existingIndex >= 0) {
+                    storedUsers[existingIndex] = { ...storedUsers[existingIndex], ...user };
+                } else {
+                    storedUsers.push(user);
+                }
+
+                localStorage.setItem("users", JSON.stringify(storedUsers));
+            } catch {
+                console.warn("Failed to update local cache");
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = "block";
+        }
+
+        function normalizeAuthError(error) {
+            if (!error || !error.code) {
+                return (error && error.message) || "Login failed. Please try again.";
+            }
+
+            switch (error.code) {
+                case "auth/invalid-credential":
+                case "auth/wrong-password":
+                    return "Incorrect email or password.";
+                case "auth/user-not-found":
+                    return "No account found with that email.";
+                case "auth/too-many-requests":
+                    return "Too many attempts. Please try again later.";
+                default:
+                    return error.message || "Login failed. Please try again.";
+            }
+        }
+    </script>
+</body>
+</html>
+
+

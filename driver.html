@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RouteLink - Driver Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar modern-navbar">
+        <div class="nav-content">
+            <div class="nav-brand">
+                <h2>RouteLink Driver</h2>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item dropdown">
+                    <button class="dropdown-btn" onclick="toggleDropdown(event)">
+                        <span id="driverName"></span>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M6 9L1 4h10z"/>
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" onclick="showProfile(); return false;">Profile</a>
+                        <a href="#" onclick="showSettings(); return false;">Settings</a>
+                        <a href="#" onclick="showContactUs(); return false;">Contact Us</a>
+                        <a href="#" onclick="showMessages(); return false;">Messages</a>
+                        <a href="#" onclick="showMap(); return false;">My Location</a>
+                        <a href="#" onclick="logout(); return false;">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="dashboard">
+            <h1>Driver Dashboard</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Assigned Bookings</h3>
+                    <p id="assignedBookings">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Completed</h3>
+                    <p id="completedBookings">0</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>My Assigned Bookings</h2>
+                <div id="driverBookings" class="bookings-list">
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="section" id="profileSection" style="display: none;">
+                <h2>My Profile</h2>
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="profileAvatar">
+                            <img id="profileImage" style="display: none;" alt="Profile">
+                            <span id="profileInitials"></span>
+                        </div>
+                        <h3 id="profileName"></h3>
+                        <p id="profileRole"></p>
+                    </div>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label for="profileImageInput">Profile Picture</label>
+                            <input type="file" id="profileImageInput" accept="image/*" onchange="handleImageUpload(event)">
+                            <small style="color: #666; display: block; margin-top: 5px;">Upload a profile picture (JPG, PNG, etc.)</small>
+                            <div id="imagePreview" style="margin-top: 10px;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="profileNameInput">Full Name</label>
+                            <input type="text" id="profileNameInput" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profileEmail">Email</label>
+                            <input type="email" id="profileEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="profileLicense">Driver License Number</label>
+                            <input type="text" id="profileLicense" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <input type="text" id="profileRoleInput" disabled style="background: #e9ecef;">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                        <p class="success-message" id="profileSuccess" style="display: none;"></p>
+                    </form>
+                    <div class="password-section">
+                        <h3>Change Password</h3>
+                        <form id="passwordForm">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Change Password</button>
+                            <p class="error-message" id="passwordError" style="display: none;"></p>
+                            <p class="success-message" id="passwordSuccess" style="display: none;"></p>
+                        </form>
+                    </div>
+                    <button onclick="hideProfile()" class="btn btn-secondary">Back to Dashboard</button>
+                </div>
+            </div>
+
+            <!-- Messages Section -->
+            <div class="section" id="messagesSection" style="display: none;">
+                <div class="modern-card">
+                    <h2>Messages</h2>
+                    <div id="messagesList" class="messages-list">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    <button onclick="hideMessages()" class="btn btn-secondary">Back</button>
+                </div>
+            </div>
+
+            <!-- Map Section -->
+            <div class="section" id="mapSection" style="display: none;">
+                <div class="modern-card">
+                    <h2>My Location</h2>
+                    <div id="map" style="height: 500px; width: 100%; border-radius: 8px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                        <p>Map will be displayed here</p>
+                    </div>
+                    <button onclick="hideMap()" class="btn btn-secondary">Back</button>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="section" id="settingsSection" style="display: none;">
+                <div class="modern-card">
+                    <h2>Settings</h2>
+                    <div class="settings-content">
+                        <div class="setting-item">
+                            <h3>Notifications</h3>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <button onclick="hideSettings()" class="btn btn-secondary">Back</button>
+                </div>
+            </div>
+
+            <!-- Contact Us Section -->
+            <div class="section" id="contactSection" style="display: none;">
+                <div class="modern-card">
+                    <h2>Contact Us</h2>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                    <button onclick="hideContactUs()" class="btn btn-secondary">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
+
